@@ -21,18 +21,19 @@ if not defined MM (
 rem 3) parse micromamba.bat if present
 if not defined MM (
     for /f "delims=" %%F in ('where micromamba.bat 2^>nul') do (
-        for /f "tokens=2 delims==\"" %%G in ('findstr /i "MAMBA_EXE" "%%F"') do if exist "%%G" set "MM=%%G"
-        for /f "tokens=2 delims==\"" %%H in ('findstr /i "MAMBA_ROOT_PREFIX" "%%F"') do set "MRP=%%H"
+        for /f "tokens=2 delims==^\"" %%G in ('findstr /i "MAMBA_EXE" "%%F"') do if exist "%%~G" set "MM=%%~G"
+        for /f "tokens=2 delims==^\"" %%H in ('findstr /i "MAMBA_ROOT_PREFIX" "%%F"') do set "MRP=%%~H"
         if defined MM goto :mm_found
     )
 )
 
-if not defined MM (
-    set /p MM=Enter full path to micromamba.exe:
-    if not exist "%MM%" (
-        echo File not found. Try again.
-        goto prompt_mm
-    )
+if not defined MM goto prompt_mm
+
+:prompt_mm
+set /p MM=Enter full path to micromamba.exe:
+if not exist "%MM%" (
+    echo File not found. Try again.
+    goto prompt_mm
 )
 :mm_found
 
