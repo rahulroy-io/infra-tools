@@ -21,18 +21,19 @@ if not defined MM (
 rem 3) parse micromamba.bat if present
 if not defined MM (
     for /f "delims=" %%F in ('where micromamba.bat 2^>nul') do (
-        for /f "tokens=2 delims==\"" %%G in ('findstr /i "MAMBA_EXE" "%%F"') do if exist "%%G" set "MM=%%G"
-        for /f "tokens=2 delims==\"" %%H in ('findstr /i "MAMBA_ROOT_PREFIX" "%%F"') do set "MRP=%%H"
+        for /f "tokens=2 delims==^\"" %%G in ('findstr /i "MAMBA_EXE" "%%F"') do if exist "%%~G" set "MM=%%~G"
+        for /f "tokens=2 delims==^\"" %%H in ('findstr /i "MAMBA_ROOT_PREFIX" "%%F"') do set "MRP=%%~H"
         if defined MM goto :mm_found
     )
 )
 
-if not defined MM (
-    set /p MM=Enter full path to micromamba.exe:
-    if not exist "%MM%" (
-        echo File not found. Try again.
-        goto prompt_mm
-    )
+if not defined MM goto prompt_mm
+
+:prompt_mm
+set /p MM=Enter full path to micromamba.exe:
+if not exist "%MM%" (
+    echo File not found. Try again.
+    goto prompt_mm
 )
 :mm_found
 
@@ -88,10 +89,10 @@ copy "%MM%" "%WORK_DIR%" >nul
 
 rem Create README_offline.txt
 (
-    echo set MAMBA_ROOT_PREFIX=%%CD%%\micromamba
-    echo set CONDA_PKGS_DIRS=%%CD%%
-    echo .\micromamba.exe create -n %ENV_NAME% -f %ENV_NAME%_env.yml --override-channels -c file://%%CD%% --offline -y
-    echo .\micromamba.exe activate %ENV_NAME% ^&^& micromamba list -n %ENV_NAME%
+    echo set "MAMBA_ROOT_PREFIX=%%CD%%\micromamba"
+    echo set "CONDA_PKGS_DIRS=%%CD%%"
+    echo "\.\micromamba.exe" create -n %ENV_NAME% -f %ENV_NAME%_env.yml --override-channels -c file://%%CD%% --offline -y
+    echo "\.\micromamba.exe" activate %ENV_NAME% ^&^& micromamba list -n %ENV_NAME%
 ) > "%WORK_DIR%\README_offline.txt"
 
 rem Zip the working folder
